@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day's</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .calendar {
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 20px;
+            background-color: #c2c2c2;
+            color: #FFF;
+        }
+        .day, .header {
+            border: 3px solid #ccc;
+            padding: 10px;
+            width: 14.28%; /* 7 columns for each day of the week */
+            text-align: center;
+            cursor: pointer;
+        }
+        .header {
+            font-weight: bold;
+        }
+        .today {
+            background-color: #38c7ff;
+            border: #42b0ff 5px solid;
+        }
+        .header-content {
+            position: relative;
+            left: 400px;
+            text-align: left;
+            height: 150px;
+            bottom: 0px;
+
+        }
+        header{
+            height: 200px;
+            width: 120%;
+            position: relative;
+            bottom: 50px;
+            right: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header class=" text-white py-3" style="background-color: rgb(255, 123, 0);">
+        <div class="header-content">
+            <img src="SSO.png" width="250px" style="position: relative; right: 350px; top: 80px;"onclick="go();">
+            <h1 style="font-size: 70px; position: relative; right: 00px; top: 0px; color: #FFF;">Day's</h1>
+
+        </div>
+    </header>
+    <div class="form-inline mb-3" style="font-size: 20px;">
+        <select id="year" class="form-control mr-3"></select>
+        <label for="year" class="mr-2">年　</label>
+        <select id="month" class="form-control"></select>
+        <label for="month" class="mr-2">　月　</label>
+    </div>
+    <div class="calendar" id="calendar"></div>
+    <script>
+                function go(){
+            window.location.href = "home.html"
+        }
+        const calendar = document.getElementById('calendar');
+        const yearSelect = document.getElementById('year');
+        const monthSelect = document.getElementById('month');
+
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1; // 月は0から始まるため
+
+        for (let i = 2020; i <= 2030; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearSelect.appendChild(option);
+        }
+
+        for (let i = 1; i <= 12; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            monthSelect.appendChild(option);
+        }
+
+        yearSelect.value = currentYear;
+        monthSelect.value = currentMonth;
+
+        yearSelect.addEventListener('change', generateCalendar);
+        monthSelect.addEventListener('change', generateCalendar);
+
+        function generateCalendar() {
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            calendar.innerHTML = '';
+            const headers = ['日', '月', '火', '水', '木', '金', '土'];
+            headers.forEach(header => {
+                const headerCell = document.createElement('div');
+                headerCell.classList.add('header');
+                headerCell.textContent = header;
+                calendar.appendChild(headerCell);
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('day');
+                calendar.appendChild(emptyCell);
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.classList.add('day');
+                day.textContent = i;
+                if (year === today.getFullYear() && month === (today.getMonth() + 1) && i === today.getDate()) {
+                    day.classList.add('today');
+                }
+                day.addEventListener('click', () => openEventOptions(i));
+                calendar.appendChild(day);
+            }
+        }
+
+        function openEventOptions(day) {
+            const eventDate = `${yearSelect.value}-${monthSelect.value}-${day}`;
+            Swal.fire({
+                title: `オプション: ${eventDate}`,
+                showCancelButton: true,
+                confirmButtonText: '編集',
+                cancelButtonText: '予定'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openEventForm(eventDate);
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    showEventDetails(eventDate);
+                }
+            });
+        }
+
+        function openEventForm(eventDate) {
+            const eventDesc = localStorage.getItem(`event-${eventDate}`) || '';
+            const eventTime = localStorage.getItem(`time-${eventDate}`) || '';
+
+            Swal.fire({
+                title: `予定を追加: ${eventDate}`,
+                html: `<textarea id="event-desc" class="swal2-textarea" placeholder="内容">${eventDesc}</textarea>
+                       <input type="time" id="event-time" class="swal2-input" value="${eventTime}">
+                       <input type="hidden" id="event-date" value="${eventDate}">`,
+                showCancelButton: true,
+                confirmButtonText: '保存',
+                cancelButtonText: '削除',
+                preConfirm: () => {
+                    const eventDesc = Swal.getPopup().querySelector('#event-desc').value;
+                    const eventTime = Swal.getPopup().querySelector('#event-time').value;
+                    return { eventDate, eventDesc, eventTime };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { eventDate, eventDesc, eventTime } = result.value;
+                    if (eventDesc) {
+                        localStorage.setItem(`event-${eventDate}`, eventDesc);
+                        localStorage.setItem(`time-${eventDate}`, eventTime);
+                        Swal.fire('保存完了', '予定が保存されました！', 'success');
+                    } else {
+                        Swal.fire('エラー', '内容を入力してください。', 'error');
+                    }
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    localStorage.removeItem(`event-${eventDate}`);
+                    localStorage.removeItem(`time-${eventDate}`);
+                    Swal.fire('削除完了', '予定が削除されました！', 'success');
+                }
+            });
+        }
+
+        function showEventDetails(eventDate) {
+            const eventDesc = localStorage.getItem(`event-${eventDate}`) || '予定はありません。';
+            const eventTime = localStorage.getItem(`time-${eventDate}`) || '';
+
+            Swal.fire({
+                title: `予定の詳細: ${eventDate}`,
+                html: `<p>${eventDate}</p><p>内容: ${eventDesc.replace(/\n/g, '<br>')}</p><p>時間: ${eventTime}</p>`,
+                showConfirmButton: true,
+                confirmButtonText: '編集',
+                showCancelButton: true,
+                cancelButtonText: '閉じる'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openEventForm(eventDate);
+                }
+            });
+        }
+
+        generateCalendar();
+    </script>
+</body>
+</html>

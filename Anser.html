@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Anser</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Handsontable CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.css">
+    <!-- ExcelJS and FileSaver.js -->
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        #hot {
+            width: 100%;
+            margin: 20px 0;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: rgb(58, 58, 58);
+            background-color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            height: 150px;
+        }
+        .toolbar {
+            background-color: gray;
+            width: 250px;
+            padding: 10px 10px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .fsi{
+            position: relative;
+            left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="text-white py-3" style="background-color: rgb(0, 187, 0);">
+        <div class="header-content container">
+            <img src="SSO.png" width="250px" style="position: relative; right:200px;"onclick="go();">
+            <h1 style="position: relative; bottom: 20px; right: 450px; font-size: 60px;">Anser</h1>
+             <div style="position: relative; top: 40px; right: 900px;">
+                <button class="icon-btn" onclick="showSaveDialog()"><i class="fas fa-save"></i></button>
+                <input type="file" id="fileInput" class="icon-btn" style="display: none;" onchange="loadFile(event)">
+                <label for="fileInput" class="icon-btn"><i class="fas fa-folder-open fsi"></i></label>
+             </div>
+
+        </div>
+    </header>
+    <div class="container mt-5">
+        <div id="hot"></div>
+        <div class="toolbar mt-3">
+            <button class="icon-btn" onclick="addRow()"><i class="fas fa-plus"></i></button>
+            <button class="icon-btn" onclick="addColumn()"><i class="fas fa-columns"></i></button>
+        </div>
+    </div>
+
+    <script>
+                function go(){
+            window.location.href = "home.html"
+        }
+// 初期データのセットアップ
+var data = [
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+
+];
+
+// Handsontableの初期設定
+var container = document.getElementById('hot');
+var hot = new Handsontable(container, {
+    data: data,
+    rowHeaders: true,
+    colHeaders: true,
+    contextMenu: true,
+    manualRowResize: true,
+    manualColumnResize: true,
+    licenseKey: 'non-commercial-and-evaluation'
+});
+
+// 行を追加する関数
+function addRow() {
+    hot.alter('insert_row', hot.countRows());
+}
+
+// 列を追加する関数
+function addColumn() {
+    var colNum = hot.countCols();
+    hot.alter('insert_col', colNum);
+    hot.updateSettings({
+        colHeaders: function(index) {
+            return index >= 0 ? String.fromCharCode('A'.charCodeAt(0) + index) : null;
+        }
+    });
+}
+
+// 保存ダイアログを表示する関数
+function showSaveDialog() {
+    Swal.fire({
+        title: 'ファイル形式を選択してください',
+        input: 'select',
+        inputOptions: {
+            'xlsx': 'Excel (XLSX)',
+            'csv': 'CSV',
+            'html': 'HTML',
+            'pdf': 'PDF',
+            'txt': 'TXT',
+            'xml': 'XML',
+            'xps': 'XPS'
+        },
+        inputPlaceholder: 'ファイル形式を選択',
+        showCancelButton: true,
+        inputValidator: (value) => {
+            return new Promise((resolve) => {
+                if (value) {
+                    saveFile(value);
+                    resolve();
+                } else {
+                    resolve('ファイル形式を選択してください');
+                }
+            });
+        }
+    });
+}
+
+// ファイル保存のメイン関数
+function saveFile(format) {
+    var content = hot.getData();
+    switch(format) {
+        case "xlsx":
+            saveAsXLSX(content);
+            break;
+        case "csv":
+            saveAsCSV(content);
+            break;
+        case "html":
+            saveAsHTML(content);
+            break;
+        case "pdf":
+            saveAsPDF(content);
+            break;
+        case "txt":
+            saveAsTXT(content);
+            break;
+        case "xml":
+            saveAsXML(content);
+            break;
+        case "xps":
+            saveAsXPS(content);
+            break;
+    }
+}
+
+// 各ファイル形式での保存関数
+function saveAsXLSX(data) {
+    var workbook = new ExcelJS.Workbook();
+    var worksheet = workbook.addWorksheet('My Sheet');
+    worksheet.addRows(data);
+    workbook.xlsx.writeBuffer().then(function(buffer) {
+        var blob = new Blob([buffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+        saveAs(blob, "document.xlsx");
+    });
+}
+
+function saveAsCSV(data) {
+    var csvContent = data.map(row => row.join(',')).join('\n');
+    var blob = new Blob([csvContent], {type: "text/csv;charset=utf-8"});
+    saveAs(blob, "document.csv");
+}
+
+function saveAsHTML(data) {
+    var htmlContent = '<table border="1"><thead><tr>';
+    hot.getColHeader().forEach(function(col) {
+        htmlContent += `<th>${col}</th>`;
+    });
+    htmlContent += '</tr></thead><tbody>';
+    data.forEach(function(row) {
+        htmlContent += '<tr>';
+        row.forEach(function(cell) {
+            htmlContent += `<td>${cell}</td>`;
+        });
+        htmlContent += '</tr>';
+    });
+    htmlContent += '</tbody></table>';
+
+    var blob = new Blob([htmlContent], {type: "text/html;charset=utf-8"});
+    saveAs(blob, "document.html");
+}
+
+function saveAsPDF(data) {
+    var element = document.createElement('div');
+    var htmlContent = '<table border="1" style="width:100%"><thead><tr>';
+    hot.getColHeader().forEach(function(col) {
+        htmlContent += `<th>${col}</th>`;
+    });
+    htmlContent += '</tr></thead><tbody>';
+    data.forEach(function(row) {
+        htmlContent += '<tr>';
+        row.forEach(function(cell) {
+            htmlContent += `<td>${cell}</td>`;
+        });
+        htmlContent += '</tr>';
+    });
+    htmlContent += '</tbody></table>';
+    element.innerHTML = htmlContent;
+
+    html2pdf().from(element).save('document.pdf');
+}
+
+function saveAsTXT(data) {
+    var textContent = data.map(row => row.join('\t')).join('\n');
+    var blob = new Blob([textContent], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, "document.txt");
+}
+
+function saveAsXML(data) {
+    var xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n<spreadsheet>';
+    data.forEach(function(row, rowIndex) {
+        xmlContent += '\n  <row index="' + rowIndex + '">';
+        row.forEach(function(cell, colIndex) {
+            xmlContent += '\n    <cell index="' + colIndex + '">' + cell + '</cell>';
+        });
+        xmlContent += '\n  </row>';
+    });
+    xmlContent += '\n</spreadsheet>';
+
+    var blob = new Blob([xmlContent], {type: "application/xml;charset=utf-8"});
+    saveAs(blob, "document.xml");
+}
+
+function saveAsXPS(data) {
+    var xpsContent = '<?xml version="1.0" encoding="UTF-8"?>\n<FixedDocument>';
+    data.forEach(function(row, rowIndex) {
+        xpsContent += '\n  <PageContent>\n    <FixedPage Width="816" Height="1056" xml:lang="ja-JP">';
+        row.forEach(function(cell, colIndex) {
+            xpsContent += '\n      <TextBlock>' + cell + '</TextBlock>';
+        });
+        xpsContent += '\n    </FixedPage>\n  </PageContent>';
+    });
+    xpsContent += '\n</FixedDocument>';
+
+    var blob = new Blob([xpsContent], {type: "application/vnd.ms-xpsdocument;charset=utf-8"});
+    saveAs(blob, "document.xps");
+}
+
+// ファイルを読み込む関数
+function loadFile(event) {
+    var file = event.target.files[0];
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+        var contents = e.target.result;
+        // XLSXファイルの読み込み
+        if (file.name.endsWith('.xlsx')) {
+            var workbook = new ExcelJS.Workbook();
+            workbook.xlsx.load(contents).then(function() {
+                var worksheet = workbook.getWorksheet(1);
+                var newData = [];
+                worksheet.eachRow(function(row, rowNumber) {
+                    var rowData = [];
+                    row.eachCell(function(cell, colNumber) {
+                        rowData.push(cell.value);
+                    });
+                    newData.push(rowData);
+                });
+                hot.loadData(newData);
+            });
+        // CSVファイルの読み込み
+        } else if (file.name.endsWith('.csv')) {
+            var csvContent = contents.split('\n').map(row => row.split(','));
+            hot.loadData(csvContent);
+        // その他のファイル形式の読み込み
+        } else {
+            alert('サポートされていないファイル形式です');
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+</script>
+</body>
+</html>

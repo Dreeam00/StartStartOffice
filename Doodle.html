@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Doodle</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.0/spectrum.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.10/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            width: 150%;
+            height: calc(100vh - 20px);
+        }
+
+        .ribbon {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ff007b;
+            width: 103.6%;
+            height: 10%;
+            position: relative;
+            bottom: 50px;
+            right: 20px;
+            padding: 10px;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .menu {
+            width: 200px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background-color: #ffffff;
+            border: 2px solid #000;
+        }
+
+        canvas {
+            border: 2px solid #000;
+            border-radius: 4px;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="ribbon">
+            <img src="SSO.png" width="150px" style="position: relative; right: 0px; top: 0px;"onclick="go();">
+            <h1 class="mb-0">Doodle</h1>
+            <div class="tab-buttons">
+                <button class="btn btn-light mr-2" id="brush-tab">ブラシ</button>
+                <button class="btn btn-light mr-2" id="shape-tab">図形</button>
+                <button class="btn btn-light mr-2" id="text-tab">テキスト</button>
+                <button class="btn btn-light mr-2" id="canvas-tab">キャンバス</button>
+                <button class="btn btn-light mr-2" id="file-tab">ファイル</button>
+                <button class="btn btn-light" id="layer-tab">レイヤー</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="menu" id="toolMenu">
+                <div id="brush-tools" class="tool-section">
+                    <div class="form-group">
+                        <label for="colorPicker">色選択:</label>
+                        <input type="text" id="colorPicker" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="brushSize">ブラシサイズ:</label>
+                        <input type="range" id="brushSize" class="form-control-range" min="1" max="50" value="5">
+                    </div>
+                    <div class="form-group">
+                        <button id="eraserBtn" class="btn btn-secondary btn-block">消しゴム</button>
+                    </div>
+                </div>
+                <div id="shape-tools" class="tool-section" style="display:none;">
+                    <div class="form-group">
+                        <button id="rectangleBtn" class="btn btn-secondary btn-block">長方形</button>
+                        <button id="circleBtn" class="btn btn-secondary btn-block">円</button>
+                        <button id="lineBtn" class="btn btn-secondary btn-block">直線</button>
+                    </div>
+                </div>
+                <div id="text-tools" class="tool-section" style="display:none;">
+                    <div class="form-group">
+                        <label for="textInput">テキスト入力:</label>
+                        <input type="text" id="textInput" class="form-control">
+                        <button id="textAddBtn" class="btn btn-secondary btn-block mt-2">テキスト追加</button>
+                    </div>
+                </div>
+                <div id="canvas-tools" class="tool-section" style="display:none;">
+                    <div class="form-group">
+                        <button id="clearCanvasBtn" class="btn btn-danger btn-block">キャンバスクリア</button>
+                    </div>
+                </div>
+                <!-- ファイル読み込みボタン -->
+<div id="file-tools" class="tool-section" style="display:none;">
+    <div class="form-group">
+        <input type="file" id="fileInput" class="form-control">
+        <button id="saveBtn" class="btn btn-primary btn-block">保存</button>
+    </div>
+</div>
+
+
+                <div id="layer-tools" class="tool-section" style="display:none;">
+                    <div class="form-group">
+                        <button id="addLayerBtn" class="btn btn-secondary btn-block">レイヤー追加</button>
+                    </div>
+                    <div id="layerList" class="form-group">
+                        <!-- レイヤーリストはここに動的に追加されます -->
+                    </div>
+                </div>
+            </div>
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="paintCanvas" width="800" height="600"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/konva/8.2.0/konva.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.0/spectrum.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.10/dist/sweetalert2.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script>
+                function go(){
+            window.location.href = "home.html"
+        }
+$(document).ready(function() {
+    const stage = new Konva.Stage({
+        container: 'canvasContainer',
+        width: 800,
+        height: 600
+    });
+
+    let layers = [new Konva.Layer()];
+    stage.add(layers[0]);
+    let currentLayerIndex = 0;
+    let history = [];
+    let historyStep = -1;
+
+    let color = '#000000';
+    let size = 5;
+    let mode = 'brush';
+    let isDrawing = false;
+
+    // カラーピッカー
+    $("#colorPicker").spectrum({
+        color: color,
+        change: function(newColor) {
+            color = newColor.toHexString();
+        }
+    });
+
+    // ブラシサイズ
+    $('#brushSize').on('input', function() {
+        size = this.value;
+    });
+
+    // 消しゴムボタン
+    $('#eraserBtn').on('click', function() {
+        mode = 'eraser';
+    });
+
+    // 長方形ボタン
+    $('#rectangleBtn').on('click', function() {
+        mode = 'rectangle';
+    });
+
+    // 円ボタン
+    $('#circleBtn').on('click', function() {
+        mode = 'circle';
+    });
+
+    // 直線ボタン
+    $('#lineBtn').on('click', function() {
+        mode = 'line';
+    });
+
+    // テキスト追加ボタン
+    $('#textAddBtn').on('click', function() {
+        mode = 'text';
+        const textValue = $('#textInput').val();
+        const text = new Konva.Text({
+            x: 100,
+            y: 100,
+            text: textValue,
+            fontSize: 24,
+            fill: color,
+            draggable: true
+        });
+        layers[currentLayerIndex].add(text);
+        layers[currentLayerIndex].draw();
+        saveHistory();
+    });
+
+    // キャンバスクリアボタン
+    $('#clearCanvasBtn').on('click', function() {
+        Swal.fire({
+            title: 'キャンバスをクリアしますか？',
+            showCancelButton: true,
+            confirmButtonText: 'はい',
+            cancelButtonText: 'いいえ'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                layers[currentLayerIndex].clear();
+                layers[currentLayerIndex].removeChildren();
+                layers[currentLayerIndex].draw();
+                saveHistory();
+            }
+        });
+    });
+
+    // 保存ボタン
+    $('#saveBtn').on('click', function() {
+        const dataURL = stage.toDataURL();
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'drawing.png';
+        link.click();
+    });
+
+    // レイヤー追加ボタン
+    $('#addLayerBtn').on('click', function() {
+        const newLayer = new Konva.Layer();
+        stage.add(newLayer);
+        layers.push(newLayer);
+        updateLayerList();
+    });
+
+    // レイヤーの切り替え
+    $('#layerList').on('click', '.layer-toggle', function() {
+        const index = $(this).data('index');
+        layers[index].visible(!layers[index].visible());
+        layers[index].draw();
+        $(this).toggleClass('btn-secondary btn-outline-secondary');
+    });
+
+    $('#layerList').on('click', '.layer-select', function() {
+        const index = $(this).data('index');
+        currentLayerIndex = index;
+        layers.forEach((layer, i) => {
+            layer.visible(i === currentLayerIndex);
+        });
+        layers[currentLayerIndex].draw();
+    });
+
+    // ファイル読み込み
+    $('#fileInput').on('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const imgInstance = new Konva.Image({
+                    image: img,
+                    x: 50,
+                    y: 50,
+                    draggable: true
+                });
+                layers[currentLayerIndex].add(imgInstance);
+                layers[currentLayerIndex].draw();
+                saveHistory();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // 履歴の保存
+    function saveHistory() {
+        history = history.slice(0, historyStep + 1);
+        history.push(stage.toJSON());
+        historyStep++;
+    }
+
+    // 戻るボタン
+    $('#undoBtn').on('click', function() {
+        if (historyStep > 0) {
+            historyStep--;
+            stage.destroyChildren();
+            Konva.Node.create(history[historyStep], 'canvasContainer');
+        }
+    });
+
+    // 進むボタン
+    $('#redoBtn').on('click', function() {
+        if (historyStep < history.length - 1) {
+            historyStep++;
+            stage.destroyChildren();
+            Konva.Node.create(history[historyStep], 'canvasContainer');
+        }
+    });
+
+    // 描画機能
+    stage.on('mousedown touchstart', function(e) {
+        if (['brush', 'eraser', 'rectangle', 'circle', 'line'].includes(mode)) {
+            isDrawing = true;
+            let shape;
+
+            if (mode === 'brush' || mode === 'eraser') {
+                shape = new Konva.Line({
+                    stroke: mode === 'eraser' ? '#ffffff' : color,
+                    strokeWidth: size,
+                    globalCompositeOperation: mode === 'eraser' ? 'destination-out' : 'source-over',
+                    points: [e.target.getPointerPosition().x, e.target.getPointerPosition().y]
+                });
+            } else if (mode === 'rectangle') {
+                shape = new Konva.Rect({
+                    x: e.target.getPointerPosition().x,
+                    y: e.target.getPointerPosition().y,
+                    width: 0,
+                    height: 0,
+                    fill: color,
+                    stroke: color,
+                    strokeWidth: size,
+                    draggable: true
+                });
+            } else if (mode === 'circle') {
+                shape = new Konva.Circle({
+                    x: e.target.getPointerPosition().x,
+                    y: e.target.getPointerPosition().y,
+                    radius: 0,
+                    fill: color,
+                    stroke: color,
+                    strokeWidth: size,
+                    draggable: true
+                });
+            } else if (mode === 'line') {
+                shape = new Konva.Line({
+                    points: [e.target.getPointerPosition().x, e.target.getPointerPosition().y],
+                    stroke: color,
+                    strokeWidth: size,
+                    draggable: true,
+                    lineCap: 'round'
+                });
+            }
+
+            layers[currentLayerIndex].add(shape);
+            stage.on('mousemove touchmove', function() {
+                if (!isDrawing) return;
+                const pos = e.target.getPointerPosition();
+                if (mode === 'brush' || mode === 'eraser') {
+                    const newPoints = shape.points().concat([pos.x, pos.y]);
+                    shape.points(newPoints);
+                } else if (mode === 'rectangle') {
+                    shape.width(pos.x - shape.x());
+                    shape.height(pos.y - shape.y());
+                } else if (mode === 'circle') {
+                    const radius = Math.sqrt(Math.pow(pos.x - shape.x(), 2) + Math.pow(pos.y - shape.y(), 2));
+                    shape.radius(radius);
+                } else if (mode === 'line') {
+                    shape.points([shape.points()[0], shape.points()[1], pos.x, pos.y]);
+                }
+                layers[currentLayerIndex].batchDraw();
+            });
+        }
+    });
+
+    stage.on('mouseup touchend', function() {
+        isDrawing = false;
+        stage.off('mousemove touchmove');
+        saveHistory();
+    });
+
+    // タブ切り替え
+    $('.tab-buttons button').on('click', function() {
+        const tabId = $(this).attr('id');
+        $('.tool-section').hide();
+        $(`#${tabId.replace('-tab', '-tools')}`).show();
+    });
+
+    // 初期表示
+    $('#brush-tools').show();
+});
+
+</script>
+</body>
+</html>

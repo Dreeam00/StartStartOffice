@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Start Office</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #ededed;
+            color: #4e4e4e;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 400px;
+            background-color: #6d6d6d;
+            padding: 15px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 6px 0px #838383;
+        }
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 0;
+        }
+        .sidebar a:hover {
+            background-color: #4b4b4b;
+        }
+        .main {
+            margin-left: 220px;
+            padding: 15px;
+            position: relative;
+            left: 200px;
+            top: 50px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .buttons button, .quick-access button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #555;
+            color: #fff;
+            border: none;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .buttons button:hover, .quick-access button:hover {
+            background-color: #777;
+        }
+        .content {
+            display: none;
+        }
+        .content.active {
+            display: block;
+        }
+        .apps{
+            height: 150px;
+            width: 27%;
+            background-color: #c3c3c3;
+            border-radius: 15px;
+            box-shadow: 2px 2px 4px gray;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="color: #fff;"><img src="SSO.png" width="300px"onclick="go();"></h2>
+        <a href="#" data-target="home">　<i class="fas fa-home"></i> ホーム</a>
+        <a href="#" data-target="word">　 Word's</a>
+        <a href="#" data-target="excel">　 Anser</a>
+        <a href="#" data-target="powerpoint">　 Task</a>
+        <a href="#" data-target="apps">　<i class="fa fa-window-maximize"></i> アプリ</a>
+        <a href="#" data-target="settings" style="position: absolute; top: 90%;"><i class="fas fa-cog fa-2x"></i></a>
+    </div>
+    <div class="main">
+        <div id="home" class="content active">
+            <img src="SS.png" style="text-align: center; position: relative; bottom: 20px; padding: 5px 5px; background-color: #cdcdcd; left: 380px; border-radius: 50%;" width="150px" >
+            <h1 style="text-align: center; position: relative; right: 140px;">Start Start Officeへようこそ</h1>
+            <p style="position: relative; left: 130px;">Start Start Office Homeは、あらゆるオフィス作業を一元管理できる強力なアプリケーションです。<br>以下の基本的なオフィスツールがすべて揃っており、効率的に仕事を進めることができます。<br>
+                完全に無料で提供されており、ウェブ上で完結するオープンソースアプリケーションです。<br>JavaScriptで作成されているため、非常に軽快に動作します<br>使いやすさと機能性を兼ね備えており無料な、完璧なオフィス環境を提供します。</p>
+        </div>
+        <div id="copilot" class="content">
+            <h1>Copilot</h1>
+            <p>ここはCopilotのコンテンツです。</p>
+        </div>
+        <div id="create" class="content">
+            <h1>作成</h1>
+            <p>ここは作成ページのコンテンツです。</p>
+        </div>
+        <div id="my-content" class="content">
+            <h1>マイコンテンツ</h1>
+            <p>ここはマイコンテンツページのコンテンツです。</p>
+        </div>
+        <div id="apps" class="content">
+            <h1>アプリ</h1>
+            <div>
+                <div class="apps"  onclick="goto('Word\'s');">
+                    <h1 style="position: relative; left: 90px; top: 20px;">Word's</h1>
+                    <p style=" position: relative; left: 15px; top: 25px;">Word'sは、文章作成や編集が<br>簡単にできる強力なワードプロセッサです。</p>
+                </div>
+                <div class="apps" style="position: relative; left: 28%; bottom: 150px;" onclick="goto('Anser');">
+                    <h1 style="position: relative; left: 90px; top: 20px;">Anser</h1>
+                    <p style=" position: relative; left: 15px; top: 25px;">Anserは、データ分析や表計算に<br>最適なスプレッドシートツールです。</p>
+                </div>
+                <div class="apps" style="position: relative; left: 56%; bottom: 300px;" onclick="goto('Task');">
+                    <h1 style="position: relative; left: 90px; top: 20px;">Task</h1>
+                    <p style=" position: relative; left: 15px; top: 25px;">Taskは、タスク管理が簡単に行える<br>Todoリスト機能を提供します。</p>
+                </div>
+                
+            </div>
+
+            <div>
+                <div class="apps" style="position: relative; bottom: 230px;" onclick="goto('Day\'s');">
+                    <h1 style="position: relative; left: 90px; top: 20px;">Day's</h1>
+                    <p style=" position: relative; left: 15px; top: 25px;">Day'sは、スケジュール管理を効率化する<br>カレンダー機能を提供します。</p>
+                </div>
+                <div class="apps" style="position: relative; left: 28%; bottom: 380px;"  onclick="goto('Doodle');">
+                    <h1 style="position: relative; left: 90px; top: 20px;">Doodle</h1>
+                    <p style=" position: relative; left: 15px; top: 25px;">Doodleは、創造力を発揮できる<br>ペイントツールです。</p>
+                </div>
+                <div class="apps" style="position: relative; left: 56%; bottom: 530px;"  onclick="goto('view');">
+                    <h1 style="position: relative; left: 90px; top: 20px;">View</h1>
+                    <p style=" position: relative; left: 15px; top: 25px;">Viewは、メディアファイルの再生を<br>可能にするメディアプレーヤーです。</p>
+                </div>
+                
+            </div>
+
+        </div>
+        <div id="word" class="content">
+            <h1>Word</h1>
+            <p>Word'sは、文章作成や編集が簡単にできる強力なワードプロセッサです。</p>
+            <ul>
+                <li>直感的なユーザーインターフェース: 誰でも簡単に操作できるデザインで、使い勝手が良いです。</li>
+                <li>豊富なフォーマットオプション: 文字のスタイル、サイズ、色、段落の配置など、さまざまなフォーマットオプションを提供します。</li>
+                <li>多言語対応: 多くの言語に対応しており、グローバルに利用可能です。</li>
+            </ul>
+            <p>Word'sは、ビジネスプロフェッショナルから学生まで、あらゆるユーザーにとって理想的な文章作成ツールです。<br>創造性を発揮し、効率的に美しいドキュメントを作成できるこのツールをぜひご活用ください。</p>
+            <a class="btn btn-primary mr-2" style="color: #fff; font-size: 25px;" href="Word's.html">Word's</a>
+        </div>
+        <div id="excel" class="content">
+            <h1>Anser</h1>
+            <p>Anserは、データ分析や表計算に最適なスプレッドシートツールです。主な特徴は以下の通りです</p>
+            <ul>
+                <li>直感的なユーザーインターフェース: 簡単にデータを入力、整理、分析できます。</li>
+                <li>強力な数式と関数: 数百種類の関数を使用して、複雑な計算やデータ解析が行えます。</li>
+                <li>データの視覚化: グラフやチャートを簡単に作成し、データを視覚的に理解しやすくします。</li>
+            </ul>
+            <p>Anserは、ビジネスプロフェッショナルから学生まで、あらゆるユーザーにとって理想的なデータ分析・表計算ツールです。<br>効率的にデータを管理し、視覚化することで、洞察を得るための必須ツールとしてご利用いただけます。<br>このツールを活用し、データ駆動型の意思決定をサポートします。</p>
+            <a class="btn btn-primary mr-2" style="color: #fff; font-size: 25px;" href="Anser.html">Anser</a>
+        </div>
+        <div id="powerpoint" class="content">
+            <h1>Task</h1>
+            <p>Taskは、タスク管理が簡単に行えるTodoリスト機能を提供します。主な特徴は以下の通りです</p>
+            <ul>
+                <li>シンプルなタスク管理: タスクの追加、編集、削除が簡単に行えます。</li>
+                <li>UI:シンプルで直感的なインターフェースにより、誰でもすぐに使いこなせます。</li>
+            </ul>
+            <p>Taskは、ビジネスプロフェッショナルから学生まで、あらゆるユーザーにとって理想的なタスク管理ツールです。<br>効率的にタスクを整理し、目標を達成するための必須ツールとしてご利用いただけます。<br>このツールを活用し、生産性を最大限に高めてください。</p>
+            <a class="btn btn-primary mr-2" style="color: #fff; font-size: 25px;" href="Task.html">Task</a>
+        </div>
+        <div id="settings" class="content">
+            <h1>設定</h1>
+            <p>ここは設定ページのコンテンツです。</p>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('.sidebar a').on('click', function(){
+                var target = $(this).data('target');
+                $('.content').removeClass('active');
+                $('#' + target).addClass('active');
+            });
+        });
+        function goto(url){
+            window.location.href = url + ".html";
+        }
+    </script>
+</body>
+</html>

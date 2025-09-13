@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .todo-item.completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .custom-checkbox {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .custom-checkbox input[type="checkbox"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+        .custom-checkbox input[type="checkbox"]:checked {
+            background-color: #007bff;
+        }
+        .custom-checkbox input[type="checkbox"]:checked::after {
+            content: "\f00c";
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+        .fa-trash-alt {
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .fa-trash-alt:hover {
+            color: #007bff;
+        }
+        .d-flex {
+            display: flex;
+            justify-content: space-between;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: rgb(58, 58, 58);
+            background-color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+        .header-content {
+            position: relative;
+            left: 400px;
+            text-align: left;
+            height: 150px;
+            bottom: 0px;
+
+        }
+        header{
+            height: 200px;
+            width: 120%;
+            position: relative;
+            bottom: 50px;
+            right: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header class=" text-white py-3" style="background-color: rgb(255, 187, 0);">
+        <div class="header-content">
+            <img src="SSO.png" width="250px" style="position: relative; right: 350px; top: 80px;"onclick="go();">
+            <h1 style="font-size: 70px; position: relative; right: 800px; top: 20px;">Task</h1>
+<div style="position: relative; right: 1600px; top: 70px;">
+    <button class="icon-btn" onclick="showSaveDialog()">
+        <i class="fas fa-save"></i>
+    </button>
+    <button class="icon-btn" onclick="document.getElementById('fileInput').click();">
+        <i class="fas fa-folder-open"></i>
+    </button>
+    <input type="file" class="form-control-file" id="fileInput" accept=".json" style="display:none;" onchange="loadFile(event)">
+</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="input-group mb-3">
+            <input type="text" id="new-task" class="form-control" placeholder="新しいタスクを追加">
+            <div class="input-group-append">
+                <button class="btn btn-primary" onclick="addTask()">追加</button>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+            <button class="btn btn-success" onclick="toggleAllTasks()">全てチェック/解除</button>
+            <button class="btn btn-danger" onclick="removeAllTasks()">全て削除</button>
+        </div>
+        <ul id="task-list" class="list-group">
+            <!-- TODOタスクがここに表示されます -->
+        </ul>
+    </div>
+
+    <script>
+                function go(){
+            window.location.href = "home.html"
+        }
+        document.addEventListener("DOMContentLoaded", loadTasks);
+
+        function addTask() {
+            var taskInput = document.getElementById("new-task");
+            var taskList = document.getElementById("task-list");
+
+            if (taskInput.value.trim() !== "") {
+                var newTask = document.createElement("li");
+                newTask.className = "list-group-item todo-item";
+                newTask.innerHTML = '<div class="custom-checkbox"><input type="checkbox" onclick="toggleComplete(this)"></div>' + 
+                                    '<span>' + taskInput.value + '</span>' + 
+                                    '<i class="fas fa-trash-alt" onclick="removeTask(this)"></i>';
+
+                taskList.appendChild(newTask);
+
+                saveTasks();
+                taskInput.value = ""; // 入力フィールドをクリア
+            }
+        }
+
+        function toggleComplete(element) {
+            var taskItem = element.parentElement.parentElement;
+            taskItem.classList.toggle("completed");
+            saveTasks();
+        }
+
+        function removeTask(element) {
+            var taskItem = element.parentElement.parentElement;
+            taskItem.parentElement.removeChild(taskItem);
+            saveTasks();
+        }
+
+        function toggleAllTasks() {
+            var taskList = document.getElementById("task-list");
+            for (var i = 0; i < taskList.children.length; i++) {
+                var taskItem = taskList.children[i];
+                var checkbox = taskItem.querySelector('input[type="checkbox"]');
+                taskItem.classList.toggle("completed");
+                checkbox.checked = taskItem.classList.contains("completed");
+            }
+            saveTasks();
+        }
+
+        function removeAllTasks() {
+            var taskList = document.getElementById("task-list");
+            while (taskList.firstChild) {
+                taskList.removeChild(taskList.firstChild);
+            }
+            saveTasks();
+        }
+
+        function saveTasks() {
+            var taskList = document.getElementById("task-list");
+            var tasks = [];
+
+            for (var i = 0; i < taskList.children.length; i++) {
+                var taskItem = taskList.children[i];
+                tasks.push({
+                    text: taskItem.querySelector('span').textContent,
+                    completed: taskItem.classList.contains("completed")
+                });
+            }
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            var taskList = document.getElementById("task-list");
+            var tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+            tasks.forEach(function(task) {
+                var newTask = document.createElement("li");
+                newTask.className = "list-group-item todo-item";
+                newTask.innerHTML = '<div class="custom-checkbox"><input type="checkbox" onclick="toggleComplete(this)"' + 
+                                    (task.completed ? ' checked' : '') + '></div>' + 
+                                    '<span>' + task.text + '</span>' + 
+                                    '<i class="fas fa-trash-alt" onclick="removeTask(this)"></i>';
+
+                if (task.completed) {
+                    newTask.classList.add("completed");
+                }
+
+                taskList.appendChild(newTask);
+            });
+        }
+
+        function saveToFile() {
+            var tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            var blob = new Blob([JSON.stringify(tasks, null, 2)], { type: "application/json" });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "tasks.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function loadFromFile() {
+            var fileInput = document.getElementById("fileInput");
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                var tasks = JSON.parse(e.target.result);
+                var taskList = document.getElementById("task-list");
+                taskList.innerHTML = ""; // 現在のタスクリストをクリア
+
+                tasks.forEach(function(task) {
+                    var newTask = document.createElement("li");
+                    newTask.className = "list-group-item todo-item";
+                    newTask.innerHTML = '<div class="custom-checkbox"><input type="checkbox" onclick="toggleComplete(this)"' + 
+                                        (task.completed ? ' checked' : '') + '></div>' + 
+                                        '<span>' + task.text + '</span>' + 
+                                        '<i class="fas fa-trash-alt" onclick="removeTask(this)"></i>';
+
+                    if (task.completed) {
+                        newTask.classList.add("completed");
+                    }
+
+                    taskList.appendChild(newTask);
+                });
+
+                saveTasks();
+            };
+
+            reader.readAsText(file);
+        }
+
+        function showSaveDialog() {
+            saveToFile();
+        }
+    </script>
+</body>
+</html>
